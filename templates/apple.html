@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{title}}</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { width: 100vw; height: 100vh; overflow: hidden; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
+      background: #000000;
+    }
+
+    /* Slide container with cross-fade transition */
+    .slide {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 80px 100px;
+      opacity: 0;
+      transition: opacity 0.6s ease-in-out;
+      pointer-events: none;
+    }
+    .slide.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    /* Alternating background colors for cinematic rhythm */
+    .slide.dark { background: #000000; color: #ffffff; }
+    .slide.light { background: #f5f5f7; color: #1d1d1f; }
+
+    /* Click areas for navigation */
+    .nav-area {
+      position: fixed;
+      top: 0;
+      height: 100vh;
+      width: 50%;
+      cursor: pointer;
+      z-index: 100;
+    }
+    #prev-area { left: 0; }
+    #next-area { right: 0; }
+
+    /* Footer indicators */
+    .page-indicator {
+      position: fixed;
+      bottom: 24px;
+      right: 30px;
+      font-size: 14px;
+      opacity: 0.48;
+      z-index: 100;
+    }
+    .nav-hint {
+      position: fixed;
+      bottom: 24px;
+      left: 30px;
+      font-size: 14px;
+      opacity: 0.48;
+      z-index: 100;
+    }
+    .dark .nav-hint, .dark .page-indicator { color: #ffffff; }
+    .light .nav-hint, .light .page-indicator { color: #1d1d1f; }
+
+    /* Typography - following Apple specs */
+    h1 {
+      font-size: 56px;
+      font-weight: 600;
+      line-height: 1.07;
+      letter-spacing: -0.28px;
+      text-align: center;
+      margin-bottom: 18px;
+    }
+    h2 {
+      font-size: 40px;
+      font-weight: 600;
+      line-height: 1.10;
+      text-align: center;
+      margin-bottom: 40px;
+    }
+    h3 {
+      font-size: 28px;
+      font-weight: 400;
+      line-height: 1.14;
+      letter-spacing: 0.196px;
+      text-align: center;
+      margin-bottom: 12px;
+      opacity: 0.8;
+    }
+    p, li {
+      font-size: 17px;
+      font-weight: 400;
+      line-height: 1.47;
+      letter-spacing: -0.374px;
+    }
+    ul {
+      text-align: left;
+      max-width: 720px;
+      display: inline-block;
+    }
+    li {
+      margin-bottom: 16px;
+    }
+    strong {
+      font-weight: 600;
+    }
+    .highlight {
+      display: inline-block;
+      background: #0071e3;
+      color: #ffffff !important;
+      padding: 6px 14px;
+      border-radius: 980px;
+      font-size: 17px;
+      font-weight: 400;
+      margin: 6px 0;
+    }
+    .dark .highlight {
+      background: #0071e3;
+    }
+    .link-text {
+      color: #2997ff;
+      font-size: 14px;
+      text-decoration: none;
+    }
+    .light .link-text {
+      color: #0066cc;
+    }
+
+    /* Content container constraint */
+    .content {
+      max-width: 980px;
+      margin: 0 auto;
+    }
+
+    /* Two column layout for certain slides */
+    .two-column {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 80px;
+      max-width: 980px;
+    }
+
+    /* CTA pill button - Apple signature style */
+    .cta-pill {
+      display: inline-block;
+      padding: 8px 18px;
+      border: 1px solid currentColor;
+      border-radius: 980px;
+      text-decoration: none;
+      font-size: 17px;
+      margin-top: 30px;
+      transition: all 0.2s ease;
+    }
+    .dark .cta-pill {
+      color: #2997ff;
+      border-color: #2997ff;
+    }
+    .light .cta-pill {
+      color: #0066cc;
+      border-color: #0066cc;
+    }
+    .cta-pill:hover {
+      background-color: currentColor;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+
+{{slides}}
+
+  <div class="nav-hint">← 点击左侧上一页 | 点击右侧下一页 → ｜方向键翻页</div>
+  <div class="page-indicator"><span id="cur">1</span> / <span id="total"></span></div>
+
+  <div class="nav-area" id="prev-area"></div>
+  <div class="nav-area" id="next-area"></div>
+
+  <script>
+    const slides = document.querySelectorAll('.slide');
+    const curEl = document.getElementById('cur');
+    const totalEl = document.getElementById('total');
+    let cur = 0;
+    document.getElementById('total').textContent = slides.length;
+
+    function updateBodyBackground() {
+      const currentSlide = slides[cur];
+      if (currentSlide.classList.contains('dark')) {
+        document.body.style.background = '#000000';
+      } else {
+        document.body.style.background = '#f5f5f7';
+      }
+    }
+
+    function go(n) {
+      if (n < 0 || n >= slides.length) return;
+      slides[cur].classList.remove('active');
+      cur = n;
+      slides[cur].classList.add('active');
+      curEl.textContent = cur + 1;
+      updateBodyBackground();
+    }
+
+    document.addEventListener('keydown', e => {
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') go(cur + 1);
+      if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   go(cur - 1);
+    });
+
+    document.getElementById('prev-area').addEventListener('click', () => go(cur - 1));
+    document.getElementById('next-area').addEventListener('click', () => go(cur + 1));
+
+    updateBodyBackground();
+  </script>
+</body>
+</html>

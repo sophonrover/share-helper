@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>{{title}}</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background: #0f1117; color: #e8eaf0;
+      width: 100vw; height: 100vh; overflow: hidden;
+    }
+    .slide {
+      opacity: 0; transform: translateX(50px);
+      transition: all 0.4s ease-in-out;
+      pointer-events: none;
+      width: 100vw; height: 100vh;
+      flex-direction: column; justify-content: center;
+      align-items: center; padding: 60px 80px;
+      position: absolute; top: 0; left: 0;
+    }
+    .slide.active {
+      opacity: 1; transform: translateX(0);
+      pointer-events: auto;
+      display: flex;
+    }
+    .slide.prev {
+      opacity: 0; transform: translateX(-50px);
+      transition: all 0.4s ease-in-out;
+    }
+    .slide-num {
+      position: fixed; bottom: 20px; right: 30px;
+      font-size: 14px; opacity: 0.4;
+      z-index: 100;
+    }
+    .nav-hint {
+      position: fixed; bottom: 20px; left: 30px;
+      font-size: 14px; opacity: 0.4;
+      z-index: 100;
+    }
+    .click-area {
+      position: absolute; top: 0; height: 100%;
+      width: 50%; z-index: 50;
+      cursor: pointer;
+    }
+    #prev-area { left: 0; }
+    #next-area { right: 0; }
+    h1 { font-size: 2.8em; margin-bottom: 0.6em; text-align: center; }
+    h2 { font-size: 2.2em; margin-bottom: 0.8em; text-align: center; }
+    p, li { font-size: 1.3em; line-height: 1.7; }
+    ul { text-align: left; display: inline-block; }
+    li { margin-bottom: 0.6em; }
+    .subtitle { font-size: 1.2em; opacity: 0.7; text-align: center; margin-top: 1em; }
+    .highlight {
+      background: #238636;
+      color: white;
+      padding: 4px 12px;
+      border-radius: 6px;
+      display: inline-block;
+      margin: 4px 0;
+      box-shadow: 0 2px 8px rgba(35, 134, 54, 0.3);
+    }
+    strong { color: #58a6ff; }
+  </style>
+</head>
+<body>
+
+{{slides}}
+
+  <div class="nav-hint">← 点击左侧上一页 | 点击右侧下一页 →  | 方向键也可翻页</div>
+  <div class="slide-num">
+    <span id="cur">1</span> / <span id="total"></span>
+  </div>
+
+  <div class="click-area" id="prev-area"></div>
+  <div class="click-area" id="next-area"></div>
+
+  <script>
+    const slides = document.querySelectorAll('.slide');
+    let cur = 0;
+    document.getElementById('total').textContent = slides.length;
+
+    function go(n) {
+      if (n < 0 || n >= slides.length) return;
+      slides[cur].classList.add('prev');
+      slides[cur].classList.remove('active');
+      setTimeout(() => {
+        slides[cur].classList.remove('prev');
+      }, 400);
+      cur = n;
+      slides[cur].classList.add('active');
+      document.getElementById('cur').textContent = cur + 1;
+    }
+
+    document.addEventListener('keydown', e => {
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') go(cur + 1);
+      if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   go(cur - 1);
+    });
+
+    document.getElementById('prev-area').addEventListener('click', () => go(cur - 1));
+    document.getElementById('next-area').addEventListener('click', () => go(cur + 1));
+  </script>
+</body>
+</html>

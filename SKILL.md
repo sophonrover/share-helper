@@ -1,7 +1,7 @@
 ---
 name: share-helper
 description: Full workflow for creating internal presentation slides — from topic selection and deep research to outline, content writing, and HTML slides generation. Triggered when users ask to prepare internal sharing materials, presentations, or knowledge-sharing sessions. Outputs a browser-ready slides.html with keyboard navigation.
-version: 1.0.0
+version: 1.1.0
 metadata:
   openclaw:
     emoji: 🎯
@@ -134,86 +134,29 @@ metadata:
 
 ## 阶段五：生成 HTML 幻灯片
 
-基于 `content.md` 生成 `slides.html`，直接写入文件。
+基于 `content.md` 生成 `slides.html`，直接写入文件。支持多种设计风格可选：
 
-### 设计要求
+### 可选设计风格
 
-- 简洁专业，适合内部分享场合
-- 中文字体：`"PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif`
+| 风格 | 描述 | 适合场景 |
+|------|------|----------|
+| **anthropic** (默认) | 极简金融专业风，深蓝金标，遵循 Anthropic 前端设计指南，避免通用 AI 审美 | 金融、产品、专业内部分享 |
+| **apple** | 苹果官网风格，黑白交替背景，严格遵循 Apple 设计规范 | 产品发布、品牌分享、技术演讲 |
+| **classic** | 经典 Github 深色风格，简洁易用 | 快速分享、技术讨论 |
+
+默认使用 **anthropic** 风格，用户可指定其他风格。
+
+### 特性
+
 - 每页一个核心信息点，信息密度适中
-- 关键数据和结论用视觉方式突出（大字号、色块）
-- 配色方案：主色 + 辅助色不超过 3 种，背景统一
-- 支持键盘左右方向键翻页，显示当前页码
+- 支持键盘方向键翻页 + 点击左右边缘翻页
+- 底部进度指示器，当前页码清晰可见
+- 平滑过渡动画，精致微动效
+- **PDF 友好**：可直接通过 Chrome 打印→保存为 PDF，每一页自动分页
 
-### HTML 结构模板
+### 设计规范（Anthropic 风格默认模板）
 
-```html
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-  <meta charset="UTF-8">
-  <title>[主题]</title>
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
-      background: #0f1117; color: #e8eaf0;
-      width: 100vw; height: 100vh; overflow: hidden;
-    }
-    .slide {
-      display: none; width: 100vw; height: 100vh;
-      flex-direction: column; justify-content: center;
-      align-items: center; padding: 60px 80px;
-      position: absolute; top: 0; left: 0;
-    }
-    .slide.active { display: flex; }
-    .slide-num {
-      position: fixed; bottom: 20px; right: 30px;
-      font-size: 14px; opacity: 0.4;
-    }
-    h1 { font-size: 2.8em; margin-bottom: 0.4em; }
-    h2 { font-size: 2em; margin-bottom: 0.6em; }
-    p, li { font-size: 1.25em; line-height: 1.7; }
-    ul { text-align: left; }
-    /* 根据内容自定义主题色和布局 */
-  </style>
-</head>
-<body>
-
-  <section class="slide active" id="slide-1">
-    <!-- 封面 -->
-  </section>
-
-  <section class="slide" id="slide-2">
-    <!-- 内容页 -->
-  </section>
-
-  <!-- ... 更多页面 ... -->
-
-  <div class="slide-num">
-    <span id="cur">1</span> / <span id="total"></span>
-  </div>
-
-  <script>
-    const slides = document.querySelectorAll('.slide');
-    let cur = 0;
-    document.getElementById('total').textContent = slides.length;
-
-    function go(n) {
-      slides[cur].classList.remove('active');
-      cur = (n + slides.length) % slides.length;
-      slides[cur].classList.add('active');
-      document.getElementById('cur').textContent = cur + 1;
-    }
-
-    document.addEventListener('keydown', e => {
-      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') go(cur + 1);
-      if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   go(cur - 1);
-    });
-  </script>
-</body>
-</html>
-```
+[查看模板文件 → `templates/anthropic.html`](templates/anthropic.html)
 
 生成完成后告知用户：
 
@@ -224,6 +167,8 @@ metadata:
   • slides.html  — 在浏览器中打开，左右方向键翻页
   • content.md   — 完整文字内容（可作为讲稿参考）
   • outline.md   — 大纲
+
+📄 生成 PDF：在浏览器打开 slides.html，按页码翻到第一页，Chrome 菜单 → 打印 → "另存为 PDF" 即可导出。
 
 如需调整内容或风格，告诉我即可。
 ```
